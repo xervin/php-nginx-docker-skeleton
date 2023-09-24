@@ -1,0 +1,85 @@
+version: "3.7"
+
+networks:
+  web_net:
+    attachable: true
+
+services:
+  web:
+    build:
+      args:
+        user: webuser
+        uid: 1000
+      context: ./docker/php/
+      dockerfile: Dockerfile
+    image: test_image
+    working_dir: /var/www/
+    volumes:
+      - ./:/var/www
+      - ./docker/upload.ini:/usr/local/etc/php/conf.d/uploads.ini
+    networks:
+      - web_net
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./:/var/www
+      - ./docker/nginx:/etc/nginx/conf.d
+    networks:
+      - web_net
+
+
+#  db:
+#    image: mysql:5.7
+#    environment:
+#      MYSQL_DATABASE: ${DB_DATABASE}
+#      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+#      MYSQL_PASSWORD: ${DB_PASSWORD}
+#      MYSQL_USER: ${DB_USERNAME}
+#      SERVICE_TAGS: dev
+#      SERVICE_NAME: mysql
+#    volumes:
+#      - ./docker/mysql/db:/var/lib/mysql
+#      - ./docker/mysql/dump:/docker-entrypoint-initdb.d
+#    networks:
+#      - test_net
+#
+#  redis:
+#    image: redis:latest
+#    ports:
+#      - "6379:6379"
+#    networks:
+#      - test_net
+#
+#  memcached:
+#    image: memcached
+#    ports:
+#      - "11211"
+#    volumes:
+#      - ./:/var/www
+#    networks:
+#      - test_net
+#
+#  phpmyadmin:
+#    image: phpmyadmin
+#    ports:
+#      - 8001:80
+#    environment:
+#      PMA_HOST: db
+#      PMA_USER: ${DB_USERNAME}
+#      PMA_PASSWORD: ${DB_PASSWORD}
+#      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+#    depends_on:
+#      - db
+#    networks:
+#      - test_net
+#
+#  mailhog:
+#    image: mailhog/mailhog
+#    ports:
+#      - 1025:1025 # smtp server
+#      - 8025:8025 # web ui
+#    networks:
+#      - test_net
